@@ -4,7 +4,7 @@ box::use(
 )
 
 data <- lapply(seq(4), function(i) {
-    read_xlsx("data-raw/CPI_Data_2022.xlsx", skip = 2, sheet = i, na = "N/A")
+    read_xlsx("data/CPI_Data_2022.xlsx", skip = 2, sheet = i, na = "N/A")
 })
 names(data) <- c("overall", "emission", "price", "revenue")
 str(data)
@@ -17,12 +17,17 @@ data$overall |>
 library(leaflet)
 library(ggplot2)
 
+#loading world map geoms
 world_sf <- sf::st_as_sf(maps::map("world", plot = FALSE, fill = TRUE))
+
+# filtering subnationals and recoding names of it
 subnationals <- df %>% filter(`Type of juridiction covered` == "Subnational") %>%
   mutate(`Jurisdiction covered` = recode(`Jurisdiction covered`,
                                          "RGGI" = "New York",
                                          "Guangdong (except Shenzhen)" = "Guandong",
                                          "TCI" = "Rhode Island"))
+
+# filtering nationals and recoding names of it
 nationals <- df %>%
   filter(`Type of juridiction covered` == "National") %>%
   mutate(`Jurisdiction covered` = recode(`Jurisdiction covered`,
@@ -30,6 +35,8 @@ nationals <- df %>%
                                          "Brunei Darussalam" = "Brunei",
                                          "Korea, Republic of" = "Korea",
                                          "Cote d'Ivoire" = "Ivory Coast"))
+
+# filtering regionals
 regionals <- df %>% filter(`Type of juridiction covered` == "Regional")
 
 city_lat_lons <- readRDS(file = "data-raw/city_lat_lons.rds")
