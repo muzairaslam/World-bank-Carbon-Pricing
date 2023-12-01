@@ -9,16 +9,19 @@ box::use(
 )
 
 plot_leaflet_map <- function(nationals, regionals, subnationals) {
+  # row bind nationals and regionals and convert to sf object
   ldf <- rbind(nationals, regionals) |>
     st_as_sf()
+  # create leaflet object and provide WorldTopoMap
   lf_map <- leaflet(options = leafletOptions(minZoom = 3)) |>
     addProviderTiles(
       providers$Esri.WorldTopoMap,
       options = providerTileOptions(minZoom = 0, maxZoom = 18)
     )
   
+  # add awesomeicons on the map based on the types
   for (stype in unique(subnationals$Type)) {
-    icons <- awesomeIcons( icon = recode(subnationals |>
+    icons <- awesomeIcons(icon = recode(subnationals |>
                                            filter(Type == stype) |>
                                            pull(Status),
                                          "Implemented" = "fa-check",
@@ -33,7 +36,7 @@ plot_leaflet_map <- function(nationals, regionals, subnationals) {
     )
     lf_map <- lf_map |>
       addAwesomeMarkers(data = subnationals |> filter(Type == stype),
-                        lat = ~lat, lng =~lon, icon=icons,
+                        lat = ~lat, lng = ~lon, icon = icons,
                         label = ~paste(`Name of the initiative`),
                         group = paste0("", stype))
   }
